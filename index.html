@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Stride — a free, private, offline step counter that works in your browser.">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Stride">
+    <title>Stride — Step Counter</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-top">
+                <div class="brand">
+                    <span class="brand-mark" aria-hidden="true">S</span>
+                    <span class="brand-name">Stride</span>
+                </div>
+                <button class="btn-icon" id="settingsBtn" aria-label="Open settings" aria-haspopup="dialog">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="greeting">
+                <p class="greeting-text" id="greetingText">Hello</p>
+                <p class="greeting-date" id="greetingDate"></p>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Today's steps -->
+            <section class="card step-card" aria-labelledby="todayLabel">
+                <h2 class="sr-only" id="todayLabel">Today's steps</h2>
+                <div class="step-hero">
+                    <div class="step-value" id="stepCount">0</div>
+                    <div class="step-unit">steps today</div>
+                </div>
+                <div class="step-meta">
+                    <div class="meta-item">
+                        <span class="meta-value" id="distanceValue">0.00 km</span>
+                        <span class="meta-label">Distance</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-value" id="caloriesValue">0 kcal</span>
+                        <span class="meta-label">Calories</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-value" id="activeValue">0 min</span>
+                        <span class="meta-label">Active</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goal ring -->
+            <section class="card goal-card" aria-labelledby="goalLabel">
+                <h2 class="card-title" id="goalLabel">Daily goal</h2>
+                <div class="ring-wrap">
+                    <svg class="ring" viewBox="0 0 200 200" role="img" aria-label="Daily goal progress">
+                        <circle class="ring-track" cx="100" cy="100" r="88"></circle>
+                        <circle class="ring-fill" id="ringFill" cx="100" cy="100" r="88"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-percent" id="goalPercent">0%</div>
+                        <div class="ring-sub" id="goalSub">of goal</div>
+                    </div>
+                </div>
+                <div class="goal-footer">
+                    <div>
+                        <div class="goal-num" id="stepsRemaining">8,000</div>
+                        <div class="goal-cap">steps remaining</div>
+                    </div>
+                    <div class="goal-right">
+                        <div class="goal-num" id="stepsDoneShort">0</div>
+                        <div class="goal-cap">completed</div>
+                    </div>
+                </div>
+                <div class="celebrate" id="celebrate" aria-live="polite" hidden>Goal reached! 🎉</div>
+            </section>
+
+            <!-- Controls -->
+            <section class="card controls-card" aria-labelledby="ctrlLabel">
+                <h2 class="card-title" id="ctrlLabel">Tracking</h2>
+                <div class="controls">
+                    <button class="btn btn-primary btn-wide" id="startBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"></polygon></svg>
+                        <span>Start walking</span>
+                    </button>
+                    <div class="control-row" id="activeControls" hidden>
+                        <button class="btn btn-secondary" id="pauseBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            <span>Pause</span>
+                        </button>
+                        <button class="btn btn-secondary" id="resumeBtn" hidden>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"></polygon></svg>
+                            <span>Resume</span>
+                        </button>
+                        <button class="btn btn-danger" id="stopBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                            <span>Stop</span>
+                        </button>
+                    </div>
+                    <button class="btn btn-ghost btn-wide" id="resetBtn">Reset today's count</button>
+                </div>
+                <div class="status" id="status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span class="status-text" id="statusText">Ready</span>
+                </div>
+                <div class="permission-banner" id="permissionBanner" hidden>
+                    <p id="permissionText"></p>
+                    <button class="btn btn-primary btn-small" id="permBtn">Enable motion</button>
+                </div>
+            </section>
+
+            <!-- Weekly chart -->
+            <section class="card chart-card" aria-labelledby="weekLabel">
+                <h2 class="card-title" id="weekLabel">Last 7 days</h2>
+                <div class="chart-wrap">
+                    <svg class="chart" id="weeklyChart" viewBox="0 0 340 150" preserveAspectRatio="none" role="img" aria-label="Weekly step chart"></svg>
+                </div>
+                <div class="chart-labels" id="chartLabels"></div>
+            </section>
+
+            <!-- History -->
+            <section class="card history-card" aria-labelledby="histLabel">
+                <div class="card-head">
+                    <h2 class="card-title" id="histLabel">History</h2>
+                    <button class="btn-link" id="viewAllBtn">View all</button>
+                </div>
+                <div class="history-list" id="historyList"></div>
+                <div class="history-stats" id="historyStats"></div>
+            </section>
+
+            <!-- Diagnostics -->
+            <section class="card diag-card" aria-labelledby="diagLabel">
+                <div class="card-head">
+                    <h2 class="card-title" id="diagLabel">Sensor diagnostics</h2>
+                    <button class="btn-link" id="diagToggle">Show</button>
+                </div>
+                <div class="diag-body" id="diagBody" hidden>
+                    <div class="diag-row"><span>DeviceMotionEvent</span><span class="diag-val" id="diagSupport">—</span></div>
+                    <div class="diag-row"><span>Secure context (HTTPS)</span><span class="diag-val" id="diagSecure">—</span></div>
+                    <div class="diag-row"><span>Permission</span><span class="diag-val" id="diagPerm">—</span></div>
+                    <div class="diag-row"><span>Events received</span><span class="diag-val" id="diagEvents">0</span></div>
+                    <div class="diag-row"><span>Event rate</span><span class="diag-val" id="diagRate">0 Hz</span></div>
+                    <div class="diag-row"><span>Live acceleration</span><span class="diag-val" id="diagAccel">0.00 g</span></div>
+                    <div class="diag-row"><span>Detected peaks</span><span class="diag-val" id="diagPeaks">0</span></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>All data stays on this device. <button class="btn-link" id="privacyBtn">Privacy</button></p>
+        </footer>
+    </div>
+
+    <!-- Settings modal -->
+    <div class="modal-overlay" id="settingsModal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal-head">
+                <h2 id="settingsTitle">Settings</h2>
+                <button class="btn-icon" id="closeSettings" aria-label="Close settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="field-group">
+                    <h3 class="group-title">Daily goal</h3>
+                    <label class="field">
+                        <span class="field-label">Steps per day</span>
+                        <input type="number" id="goalInput" min="100" max="200000" step="100" inputmode="numeric">
+                    </label>
+                </div>
+                <div class="field-group">
+                    <h3 class="group-title">Distance</h3>
+                    <label class="field">
+                        <span class="field-label">Stride length (cm)</span>
+                        <input type="number" id="strideInput" min="30" max="150" step="1" inputmode="decimal">
+                    </label>
+                    <p class="field-hint">Average adult stride is about 75 cm. Measuring your own gives better distance accuracy.</p>
+                    <div class="field-row">
+                        <span class="field-label">Units</span>
+                        <div class="segmented" role="group" aria-label="Distance units">
+                            <button class="seg" id="unitKm" data-units="km">km</button>
+                            <button class="seg" id="unitMi" data-units="mi">miles</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <h3 class="group-title">Appearance</h3>
+                    <div class="field-row">
+                        <span class="field-label">Theme</span>
+                        <div class="segmented" role="group" aria-label="Theme">
+                            <button class="seg" id="themeLight" data-theme="light">Light</button>
+                            <button class="seg" id="themeDark" data-theme="dark">Dark</button>
+                            <button class="seg" id="themeAuto" data-theme="auto">Auto</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <h3 class="group-title">Step detection</h3>
+                    <label class="field">
+                        <span class="field-label">Sensitivity: <span id="sensLabel">Medium</span></span>
+                        <input type="range" id="sensInput" min="1" max="10" step="1">
+                    </label>
+                    <p class="field-hint">Higher sensitivity counts gentler movements; lower sensitivity reduces false steps from shaking or bumps. Medium suits most phones.</p>
+                </div>
+                <div class="field-group">
+                    <h3 class="group-title">Data</h3>
+                    <div class="btn-stack">
+                        <button class="btn btn-secondary" id="exportBtn">Export history as CSV</button>
+                        <button class="btn btn-danger" id="resetDataBtn">Erase all data</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <h3 class="group-title">Privacy</h3>
+                    <p class="field-hint">Stride stores everything in your browser's localStorage on this device. No account, no server, no trackers, no ads. Clearing site data, private browsing, or switching devices will lose your history. There is no cloud sync.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History modal -->
+    <div class="modal-overlay" id="historyModal" hidden>
+        <div class="modal modal-tall" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+            <div class="modal-head">
+                <h2 id="historyTitle">All history</h2>
+                <button class="btn-icon" id="closeHistory" aria-label="Close history">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid" id="allStats"></div>
+                <div class="date-picker-row">
+                    <label class="field">
+                        <span class="field-label">Look up a date</span>
+                        <input type="date" id="dateLookup">
+                    </label>
+                    <div class="lookup-result" id="lookupResult"></div>
+                </div>
+                <div class="table-scroll">
+                    <table class="table">
+                        <thead><tr><th>Date</th><th>Steps</th><th>Distance</th><th>Goal</th></tr></thead>
+                        <tbody id="historyTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session summary modal -->
+    <div class="modal-overlay" id="sessionModal" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sessionTitle">
+            <div class="modal-head">
+                <h2 id="sessionTitle">Session summary</h2>
+                <button class="btn-icon" id="closeSession" aria-label="Close summary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid" id="sessionStats"></div>
+                <button class="btn btn-primary btn-wide" id="sessionDone">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm modal -->
+    <div class="modal-overlay" id="confirmModal" hidden>
+        <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="modal-head"><h2 id="confirmTitle">Are you sure?</h2></div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+                    <button class="btn btn-danger" id="confirmOk">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register the service worker so the app opens offline.
+        // Step data lives in localStorage and is never touched by the cache.
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('service-worker.js').catch(function (err) {
+                    console.warn('Stride: service worker not registered (offline mode unavailable).', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

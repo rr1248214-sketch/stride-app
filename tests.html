@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stride — Self-test</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         margin: 0; padding: 20px; background: #0b1116; color: #f1f5f8; line-height: 1.5; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.sub { color: #9fb0bd; font-size: 14px; margin: 0 0 18px; }
+  .card { background: #141c23; border: 1px solid #24313b; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .pass { color: #34d399; font-weight: 700; }
+  .fail { color: #f87171; font-weight: 700; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0;
+         border-bottom: 1px solid #24313b; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .row:last-child { border-bottom: none; }
+  .row span:last-child { color: #9fb0bd; text-align: right; }
+  pre { white-space: pre-wrap; font-size: 13px; margin: 0; }
+  button { height: 48px; width: 100%; border-radius: 12px; border: none; font-size: 15px;
+           font-weight: 650; background: #10b981; color: #fff; margin-bottom: 10px; }
+  button.alt { background: #1a242c; color: #f1f5f8; border: 1px solid #24313b; }
+  #bar { height: 8px; background: #24313b; border-radius: 4px; overflow: hidden; margin: 10px 0 4px; }
+  #fill { height: 100%; width: 0; background: #10b981; transition: width .2s linear; }
+  .warn { color: #fbbf24; }
+</style>
+</head>
+<body>
+  <h1>Stride — self-test</h1>
+  <p class="sub">Runs the date, storage, formatting and step-algorithm checks in your browser. Nothing is uploaded.</p>
+
+  <div class="card">
+    <button id="run">Run automated checks</button>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="summary" class="row"><span>Status</span><span>Not run yet</span></div>
+    <pre id="results"></pre>
+  </div>
+
+  <div class="card">
+    <strong>Walking accuracy test</strong>
+    <p class="sub" style="margin:6px 0 12px">Count 100 steps out loud while walking. Tap Start, walk, then Stop. Compare.</p>
+    <button id="walkStart" class="alt">Start counting real steps</button>
+    <div class="row"><span>Steps detected</span><span id="live">0</span></div>
+    <div class="row"><span>Motion events</span><span id="ev">0</span></div>
+    <div class="row"><span>Permission</span><span id="perm">—</span></div>
+    <button id="walkStop" class="alt">Stop</button>
+    <div class="row"><span>Absolute error</span><span id="absErr">—</span></div>
+    <div class="row"><span>Percentage error</span><span id="pctErr">—</span></div>
+  </div>
+
+  <div class="card">
+    <strong>How to read the accuracy result</strong>
+    <p class="sub" style="margin:6px 0 0">
+      Absolute error = |detected − actual|. Percentage error = (|detected − actual| ÷ actual) × 100.
+      Under about 5% is good for a browser-based counter. Anything above about 15% means the
+      sensitivity setting needs adjusting for your phone and carrying position.
+    </p>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="tests.js"></script>
+</body>
+</html>
