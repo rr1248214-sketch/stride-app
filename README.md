@@ -5,6 +5,17 @@ no database, no API keys, no ads, no trackers. **Total ongoing cost: ₹0.**
 
 Your step history is saved in your own browser and never leaves your device.
 
+## Live now
+
+| Host | URL |
+|---|---|
+| GitHub Pages (primary) | **https://rr1248214-sketch.github.io/stride-app/** |
+| Vercel (backup) | **https://stride-app-wheat.vercel.app** |
+
+Open either on your iPhone in Safari. Both are HTTPS, which the motion sensors
+require. Add it to your home screen (Share → Add to Home Screen) so it opens
+full-screen and works offline.
+
 ---
 
 ## 1. What you got
