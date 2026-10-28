@@ -205,6 +205,25 @@ Open it in Safari on your iPhone. It is HTTPS, so motion sensors will work.
 > Updates: if you change a file and re-upload it, GitHub Pages republishes
 > automatically in about a minute.
 
+### Alternative: Vercel
+
+Vercel's free Hobby plan also hosts this with no card required. From the
+`stride-app` folder:
+
+```bash
+npx vercel login      # opens a browser to authorise — no password to type
+npx vercel deploy --prod
+```
+
+There is also a no-signup mode for a quick look:
+
+```bash
+npx vercel deploy --temporary
+```
+
+That prints a live URL plus a **claim link**. The temporary URL expires after
+60 minutes, so open the claim link to keep it under your own account.
+
 ---
 
 ## 7. Accuracy testing — do this on your phone
