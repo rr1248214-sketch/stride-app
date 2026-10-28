@@ -165,6 +165,7 @@ const el = {
     closeSettings: $('closeSettings'),
     goalInput: $('goalInput'),
     strideInput: $('strideInput'),
+    weightInput: $('weightInput'),
     unitKm: $('unitKm'),
     unitMi: $('unitMi'),
     themeLight: $('themeLight'),
@@ -980,6 +981,7 @@ async function resetToday() {
 function syncSettingsUI() {
     el.goalInput.value = state.settings.goal;
     el.strideInput.value = state.settings.strideCm;
+    el.weightInput.value = state.settings.weightKg;
     el.sensInput.value = state.settings.sensitivity;
     el.sensLabel.textContent = sensName(state.settings.sensitivity);
     el.unitKm.classList.toggle('active', state.settings.units === 'km');
@@ -1000,14 +1002,17 @@ function sensName(v) {
 function applySettingsFromInputs() {
     const goal = Math.min(200000, Math.max(100, parseInt(el.goalInput.value, 10) || 8000));
     const stride = Math.min(150, Math.max(30, parseInt(el.strideInput.value, 10) || 75));
+    const weight = Math.min(250, Math.max(30, parseInt(el.weightInput.value, 10) || 70));
     const sens = Math.min(10, Math.max(1, parseInt(el.sensInput.value, 10) || 5));
 
     state.settings.goal = goal;
     state.settings.strideCm = stride;
+    state.settings.weightKg = weight;
     state.settings.sensitivity = sens;
 
     el.goalInput.value = goal;
     el.strideInput.value = stride;
+    el.weightInput.value = weight;
     el.sensLabel.textContent = sensName(sens);
 
     saveSettings();
@@ -1092,6 +1097,7 @@ function wireEvents() {
     el.closeSettings.addEventListener('click', () => closeModal(el.settingsModal));
     el.goalInput.addEventListener('change', applySettingsFromInputs);
     el.strideInput.addEventListener('change', applySettingsFromInputs);
+    el.weightInput.addEventListener('change', applySettingsFromInputs);
     el.sensInput.addEventListener('input', () => { el.sensLabel.textContent = sensName(el.sensInput.value); });
     el.sensInput.addEventListener('change', applySettingsFromInputs);
 

@@ -16,6 +16,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <noscript>
+        <div style="max-width:520px;margin:40px auto;padding:24px;background:#141c23;color:#f1f5f8;
+                    border-radius:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+            <h1 style="font-size:20px;margin:0 0 8px">Stride needs JavaScript</h1>
+            <p style="color:#9fb0bd;margin:0">The step counter reads your phone's motion sensor and saves
+            your history in this browser, both of which need JavaScript. Please enable it and reload.</p>
+        </div>
+    </noscript>
     <div class="app">
         <header class="header">
             <div class="header-top">
@@ -186,6 +194,11 @@
                         <input type="number" id="strideInput" min="30" max="150" step="1" inputmode="decimal">
                     </label>
                     <p class="field-hint">Average adult stride is about 75 cm. Measuring your own gives better distance accuracy.</p>
+                    <label class="field">
+                        <span class="field-label">Body weight (kg)</span>
+                        <input type="number" id="weightInput" min="30" max="250" step="1" inputmode="decimal">
+                    </label>
+                    <p class="field-hint">Used only to estimate calories, on this device.</p>
                     <div class="field-row">
                         <span class="field-label">Units</span>
                         <div class="segmented" role="group" aria-label="Distance units">

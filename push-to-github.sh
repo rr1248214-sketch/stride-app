@@ -16,7 +16,8 @@ if [ ! -f "index.html" ]; then
     exit 1
 fi
 
-read -r -p "Your GitHub username: " GHUSER
+read -r -p "Your GitHub username [rr1248214-sketch]: " GHUSER
+GHUSER=${GHUSER:-rr1248214-sketch}
 if [ -z "$GHUSER" ]; then echo "Username is required."; exit 1; fi
 
 read -r -p "Repository name [stride-app]: " REPO
