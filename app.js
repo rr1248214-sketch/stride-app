@@ -717,7 +717,11 @@ function recentDays(count) {
 
 function renderHistory() {
     const rows = recentDays(7);
-    el.historyList.innerHTML = rows.map(r => {
+    const nothingYet = rows.every(r => r.steps === 0);
+
+    el.historyList.innerHTML = nothingYet
+        ? `<div class="history-empty">No steps recorded yet. Press <strong>Start walking</strong> and your daily totals will appear here.</div>`
+        : rows.map(r => {
         const met = r.steps >= state.settings.goal && r.steps > 0;
         const dist = r.steps ? fmtDistance(metersFromSteps(r.steps)) : '—';
         return `<div class="history-row">
@@ -783,7 +787,7 @@ function renderAllHistory() {
         return `<tr>
             <td>${prettyDate(key)}</td>
             <td>${fmtInt(d.steps)}</td>
-            <td>${fmtDistance(d.distanceM || metersFromSteps(d.steps))}</td>
+            <td>${fmtDistance(metersFromSteps(d.steps))}</td>
             <td class="${met ? 'met' : ''}">${met ? 'Yes' : '—'}</td>
         </tr>`;
     }).join('');
@@ -893,6 +897,16 @@ async function startTracking() {
     showTrackingControls(true);
     haptic(20);
     toast('Tracking started');
+
+    // Watchdog: if no motion events arrive at all, say so rather than
+    // silently counting nothing.
+    const eventsAtStart = Sensor.events;
+    setTimeout(() => {
+        if (state.tracking === 'idle') return;
+        if (Sensor.events === eventsAtStart) {
+            toast('No motion readings yet — check motion access is allowed.');
+        }
+    }, 5000);
 }
 
 function pauseTracking() {
@@ -939,8 +953,12 @@ function finishSession() {
         seconds: Math.round(s.seconds),
         distanceM: metersFromSteps(s.steps)
     };
-    state.sessions.push(summary);
-    saveSessions();
+    // Don't store empty sessions — just starting and stopping would otherwise
+    // pile up zero-step records in localStorage.
+    if (summary.steps > 0) {
+        state.sessions.push(summary);
+        saveSessions();
+    }
     state.session = null;
     return summary;
 }
@@ -1033,7 +1051,7 @@ function exportCSV() {
 
     keys.forEach(k => {
         const d = state.days[k];
-        const meters = d.distanceM || metersFromSteps(d.steps);
+        const meters = metersFromSteps(d.steps);
         const dist = unit === 'mi'
             ? (meters / 1609.344).toFixed(3)
             : (meters / 1000).toFixed(3);
