@@ -215,9 +215,13 @@ function applyTheme() {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', dark ? '#0b1116' : '#10b981');
-    [el.themeLight, el.themeDark, el.themeAuto].forEach(b => b && b.classList.remove('active'));
+    [el.themeLight, el.themeDark, el.themeAuto].forEach(b => {
+        if (!b) return;
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+    });
     const active = mode === 'light' ? el.themeLight : mode === 'dark' ? el.themeDark : el.themeAuto;
-    if (active) active.classList.add('active');
+    if (active) { active.classList.add('active'); active.setAttribute('aria-pressed', 'true'); }
 }
 
 mqDark.addEventListener && mqDark.addEventListener('change', () => {
@@ -349,8 +353,14 @@ const Sensor = (function () {
     const MAX_CADENCE = 3.4;     // Hz - above this it is not walking
     let crossTimes = [];
     let shakeUntil = 0;
+    let lastCrossTs = 0;
 
     function crossingIsShaking(ts) {
+        // Instant trigger: two threshold crossings closer together than 280 ms
+        // is 214+ steps/min, which is faster than a person can walk.
+        if (lastCrossTs && (ts - lastCrossTs) < 280) shakeUntil = ts + 1500;
+        lastCrossTs = ts;
+
         crossTimes.push(ts);
         while (crossTimes.length && ts - crossTimes[0] > CROSS_WINDOW) crossTimes.shift();
         const rate = crossTimes.length / (CROSS_WINDOW / 1000);
@@ -481,7 +491,7 @@ const Sensor = (function () {
         });
     }
 
-    function resetCounters() { eventCount = 0; peakCount = 0; rateStamps = []; crossTimes = []; shakeUntil = 0; }
+    function resetCounters() { eventCount = 0; peakCount = 0; rateStamps = []; crossTimes = []; shakeUntil = 0; lastCrossTs = 0; }
 
     return {
         hasDME, needsPermission,
@@ -725,6 +735,18 @@ function renderHistory() {
         <div class="stat-cell"><div class="stat-num">${fmtInt(stats.total)}</div><div class="stat-cap">Total</div></div>`;
 }
 
+/* --------------- Windowed stats: last N days --------------- */
+function rangeStats(n) {
+    let total = 0, best = 0, count = 0;
+    for (let i = 0; i < n; i++) {
+        const s = daySteps(addDays(todayKey(), -i));
+        if (s > 0) count++;
+        total += s;
+        if (s > best) best = s;
+    }
+    return { total, best, avg: count ? Math.round(total / count) : 0, days: count };
+}
+
 function historyStats() {
     const entries = Object.keys(state.days).sort().map(k => ({ key: k, steps: daySteps(k) }));
     const withSteps = entries.filter(e => e.steps > 0);
@@ -738,11 +760,15 @@ function historyStats() {
 function renderAllHistory() {
     const entries = Object.keys(state.days).sort().reverse();
     const stats = historyStats();
+    const w7 = rangeStats(7);
+    const w30 = rangeStats(30);
 
     el.allStats.innerHTML = `
         <div class="stat-box"><div class="stat-num">${fmtInt(stats.total)}</div><div class="stat-cap">Total steps</div></div>
         <div class="stat-box"><div class="stat-num">${fmtInt(stats.best)}</div><div class="stat-cap">Best day</div></div>
-        <div class="stat-box"><div class="stat-num">${fmtInt(stats.avg)}</div><div class="stat-cap">Daily average</div></div>
+        <div class="stat-box"><div class="stat-num">${fmtInt(w7.total)}</div><div class="stat-cap">Last 7 days</div></div>
+        <div class="stat-box"><div class="stat-num">${fmtInt(w30.total)}</div><div class="stat-cap">Last 30 days</div></div>
+        <div class="stat-box"><div class="stat-num">${fmtInt(w30.avg)}</div><div class="stat-cap">30-day average</div></div>
         <div class="stat-box"><div class="stat-num">${fmtInt(stats.days)}</div><div class="stat-cap">Days recorded</div></div>`;
 
     if (!entries.length) {
@@ -958,6 +984,8 @@ function syncSettingsUI() {
     el.sensLabel.textContent = sensName(state.settings.sensitivity);
     el.unitKm.classList.toggle('active', state.settings.units === 'km');
     el.unitMi.classList.toggle('active', state.settings.units === 'mi');
+    el.unitKm.setAttribute('aria-pressed', String(state.settings.units === 'km'));
+    el.unitMi.setAttribute('aria-pressed', String(state.settings.units === 'mi'));
     applyTheme();
 }
 
@@ -1124,8 +1152,24 @@ function wireEvents() {
         if (!document.hidden) { renderAll(); maybeRollover(); }
     });
 
-    // --- keep the greeting fresh ---
-    setInterval(renderGreeting, 60000);
+    // --- keyboard: Escape closes the open modal ---
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' && e.key !== 'Esc') return;
+        const open = [el.settingsModal, el.historyModal, el.sessionModal, el.confirmModal]
+            .find(m => m && !m.hidden);
+        if (!open) return;
+        if (open === el.confirmModal) settleConfirm(false);
+        else closeModal(open);
+    });
+
+    // --- keep the greeting fresh, and roll the day over if midnight passes
+    //     while the app is open but idle (no tracking running) ---
+    setInterval(() => {
+        renderGreeting();
+        const before = state.__dayBefore;
+        maybeRollover();
+        if (before !== state.__dayBefore) { renderAll(); toast('New day — counts start fresh'); }
+    }, 60000);
 }
 
 /* ------------------------------ Sensors -> UI ---------------------------- */
